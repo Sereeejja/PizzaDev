@@ -1,0 +1,136 @@
+﻿using Microsoft.EntityFrameworkCore;
+using PizzaDev.Dtos;
+using PizzaDev.Helpers;
+using PizzaDev.Interfaces;
+using PizzaDev.Interfaces.Repository;
+using PizzaDev.Interfaces.Service;
+using PizzaDev.Mappers;
+using PizzaDev.Models;
+using Type = PizzaDev.Models.Type;
+
+namespace PizzaDev.Services;
+
+public class PizzaService : IPizzaService
+{
+    private readonly IPizzaRepository _pizzaRepo;
+    private readonly IGenericRepository<Size> _sizeRepo;
+    private readonly IGenericRepository<Type> _typeRepo;
+    private readonly IGenericRepository<PizzaType> _pizzaTypeRepo;
+    private readonly IGenericRepository<PizzaSize> _pizzaSizeRepo;
+    
+    public PizzaService(
+        IPizzaRepository pizzaRepository, 
+        IGenericRepository<Size> sizeRepo, 
+        IGenericRepository<Type> typeRepo,
+        IGenericRepository<PizzaSize> pizzaSizeRepo,
+        IGenericRepository<PizzaType> pizzaTypeRepo
+        )
+    {
+        _pizzaRepo = pizzaRepository;
+        _sizeRepo = sizeRepo;
+        _typeRepo = typeRepo;
+        _pizzaSizeRepo = pizzaSizeRepo;
+        _pizzaTypeRepo = pizzaTypeRepo;
+
+    }
+    public async Task<(List<PizzaDto>, int pages)> GetAllAsync(PizzaQueryParams queryParams)
+    {
+        IQueryable<Pizza> query = _pizzaRepo.GetAll()
+            .Include(p => p.PizzaSizes)
+            .ThenInclude(ps => ps.Size)
+            .Include(p => p.PizzaTypes);
+        
+        if (!string.IsNullOrEmpty(queryParams.Search))
+        {
+            query = query.Where(p => p.Name.ToLower().Contains(queryParams.Search.ToLower()));
+        }
+
+        if (!string.IsNullOrEmpty(queryParams.SortBy))
+        {
+            query = queryParams.SortBy.ToLower() switch
+            {
+                "rating" => queryParams.Order == "asc" ? query.OrderBy(s => s.Rating) : query.OrderByDescending(s => s.Rating),
+                "price" => queryParams.Order == "asc" ? query.OrderBy(s => s.Price) : query.OrderByDescending(s => s.Price),
+                "title" => queryParams.Order == "asc" ? query.OrderBy(s => s.Name) : query.OrderByDescending(s => s.Name),
+                _ => query
+            };
+        }
+
+        if (queryParams.Category.HasValue)
+        {
+            query = query.Where(p => p.CategoryId == queryParams.Category);
+        }
+
+        var pizzas = await query.ToListAsync();
+        int totalPizzas = pizzas.Count;
+        int totalPages = (int)Math.Ceiling((double)totalPizzas / queryParams.Limit);
+        
+        var pizzaDtos = pizzas
+            .Skip((queryParams.Page - 1) * queryParams.Limit)
+            .Take(queryParams.Limit)
+            .Select(p => new PizzaDto
+            {
+                Id = p.Id,
+                Title = p.Name,
+                Price = p.Price,
+                Rating = p.Rating,
+                ImageUrl = p.ImageUrl,
+                Category = p.CategoryId,
+                Sizes = p.PizzaSizes
+                    .Select(ps => int.Parse(ps.Size.Name.Replace("cm", "")))
+                    .ToList(),
+                Types = p.PizzaTypes
+                    .Select(pt => pt.TypeId - 1)
+                    .OrderBy(type => type)
+                    .ToList()
+            
+            }).ToList();
+        
+        return (pizzaDtos, totalPages);
+    }
+
+    public async Task<Pizza?> GetOneAsync(int pizzaId)
+    {
+        var pizza = await _pizzaRepo.GetByIdAsync(pizzaId);
+        return pizza;
+    }
+
+    public async Task<Pizza?> CreateAsync(CreatePizzaRequest request)
+    {
+        var size = await _sizeRepo.ExistsAsync(request.SizeId);
+        var type = await _typeRepo.ExistsAsync(request.TypeId);
+        Console.Write(size);
+        if (!size || !type) return null;
+        var createdPizza = await _pizzaRepo.CreateAsync(request.FromCreateRequestToPizza());
+        var pizzaType = new PizzaType { PizzaId = createdPizza.Id, TypeId = request.TypeId };
+        var pizzaSize = new PizzaSize { PizzaId = createdPizza.Id, SizeId = request.SizeId };
+        await _pizzaTypeRepo.CreateAsync(pizzaType);
+        await _pizzaSizeRepo.CreateAsync(pizzaSize);
+        return createdPizza;
+    }
+
+    public async Task<bool> DeleteAsync(int pizzaId)
+    {
+        var pizza = await _pizzaRepo.GetByIdAsync(pizzaId);
+        if (pizza == null)
+        {
+            return false;
+        }
+        
+        await _pizzaRepo.DeleteAsync(pizza);
+        return true;
+    }
+
+    public async Task<PizzaSize?> AddSizeAsync(int pizzaId, int sizeId)
+    {
+        var pizza = await _pizzaRepo.GetByIdAsync(pizzaId);
+        /*var size = await _context.Sizes.FindAsync(sizeId);*/
+        if (pizza == null) return null;
+        
+        var pizzaSize = new PizzaSize{ PizzaId = pizzaId, SizeId = sizeId };
+
+        await _pizzaRepo.CreatePizzaSizeAsync(pizzaSize);
+        
+        return pizzaSize;
+    }
+}

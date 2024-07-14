@@ -1,0 +1,35 @@
+.root{
+
+  li{
+    display: inline-flex;
+
+    &:global{
+      &.selected {
+        a{
+          background-color: orangered;
+          color: white;
+        }
+      }
+    }
+
+    a{
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      width: 42px;
+      height: 42px;
+      padding: 10px;
+      border: 1px solid orangered;
+      border-radius: 30px;
+      margin-right: 10px;
+      transition: 0.2s all ease-in-out;
+      cursor: pointer;
+      font-weight: 700;
+      color: orangered;
+      &:hover{
+        background-color: orangered;
+        color: white;
+      }
+    }
+  }
+}

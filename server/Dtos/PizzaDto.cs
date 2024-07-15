@@ -9,6 +9,6 @@ public class PizzaDto
     public int Rating { get; set; }
     public int Category { get; set; }
 
-    public List<int> Sizes { get; set; }
-    public List<int> Types { get; set; }
+    public List<int> Sizes { get; set; } = new List<int>();
+    public List<int> Types { get; set; } = new List<int>();
 }

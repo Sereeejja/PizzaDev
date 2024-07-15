@@ -36,7 +36,8 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<PizzaSize>()
             .HasOne(ps => ps.Pizza)
             .WithMany(p => p.PizzaSizes)
-            .HasForeignKey(ps => ps.PizzaId);
+            .HasForeignKey(ps => ps.PizzaId)
+            .OnDelete(DeleteBehavior.Cascade);
         
         
         /* Pizza Cart Many to Many */
@@ -46,7 +47,8 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<CartItem>()
             .HasOne(cp => cp.Pizza)
             .WithMany(p => p.CartItems)
-            .HasForeignKey(cp => cp.PizzaId);
+            .HasForeignKey(cp => cp.PizzaId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<CartItem>()
             .HasOne(cp => cp.Cart)
@@ -63,7 +65,8 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<PizzaType>()
             .HasOne(pt => pt.Pizza)
             .WithMany(t => t.PizzaTypes)
-            .HasForeignKey(pt => pt.PizzaId);
+            .HasForeignKey(pt => pt.PizzaId)
+            .OnDelete(DeleteBehavior.Cascade);
         
         // Seed data for Sizes
         modelBuilder.Entity<Size>().HasData(

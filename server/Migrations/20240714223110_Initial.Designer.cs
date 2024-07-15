@@ -11,8 +11,8 @@ using PizzaDev.Data;
 namespace PizzaDev.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240711204941_New")]
-    partial class New
+    [Migration("20240714223110_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

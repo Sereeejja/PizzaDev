@@ -41,4 +41,9 @@ public class PizzaRepository : IPizzaRepository
         await _context.PizzaSizes.AddAsync(pizzaSize);
         await _context.SaveChangesAsync();
     }
+
+    public async Task SaveChangesAsync()
+    {
+        await _context.SaveChangesAsync();
+    }
 }

@@ -12,5 +12,8 @@ public interface IPizzaRepository
     
     /* Pizza Size */
     public Task CreatePizzaSizeAsync(PizzaSize pizzaSize);
+    
+    /* Save changes */
+    public Task SaveChangesAsync();
 
 }

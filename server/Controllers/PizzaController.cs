@@ -59,6 +59,16 @@ public class PizzaController : ControllerBase
         return NoContent();
     }
 
+    [HttpPost("{pizzaId:int}")]
+    public async Task<IActionResult> Edit([FromRoute] int pizzaId, [FromBody] EditPizzaRequest request)
+    {
+        if (!ModelState.IsValid) return BadRequest("Bad pizza params");
+        var pizza = await _pizzaService.EditAsync(pizzaId, request);
+        if (pizza == null) return BadRequest();
+
+        return Ok(pizza.PizzaToDto());
+    }
+
     [HttpPost("size/{pizzaId:int}/{sizeId:int}")]
     public async Task<IActionResult> AddSize([FromRoute] int pizzaId, [FromRoute] int sizeId)
     {

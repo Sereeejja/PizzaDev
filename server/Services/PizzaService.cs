@@ -17,13 +17,15 @@ public class PizzaService : IPizzaService
     private readonly IGenericRepository<Type> _typeRepo;
     private readonly IGenericRepository<PizzaType> _pizzaTypeRepo;
     private readonly IGenericRepository<PizzaSize> _pizzaSizeRepo;
+    private readonly IGenericRepository<Category> _categoryRepo;
     
     public PizzaService(
         IPizzaRepository pizzaRepository, 
         IGenericRepository<Size> sizeRepo, 
         IGenericRepository<Type> typeRepo,
         IGenericRepository<PizzaSize> pizzaSizeRepo,
-        IGenericRepository<PizzaType> pizzaTypeRepo
+        IGenericRepository<PizzaType> pizzaTypeRepo,
+        IGenericRepository<Category> categoryRepo
         )
     {
         _pizzaRepo = pizzaRepository;
@@ -31,6 +33,7 @@ public class PizzaService : IPizzaService
         _typeRepo = typeRepo;
         _pizzaSizeRepo = pizzaSizeRepo;
         _pizzaTypeRepo = pizzaTypeRepo;
+        _categoryRepo = categoryRepo;
 
     }
     public async Task<(List<PizzaDto>, int pages)> GetAllAsync(PizzaQueryParams queryParams)
@@ -99,8 +102,9 @@ public class PizzaService : IPizzaService
     {
         var size = await _sizeRepo.ExistsAsync(request.SizeId);
         var type = await _typeRepo.ExistsAsync(request.TypeId);
-        Console.Write(size);
-        if (!size || !type) return null;
+        var category = await _categoryRepo.ExistsAsync(request.CategoryId);
+        
+        if (!size || !type || !category) return null;
         var createdPizza = await _pizzaRepo.CreateAsync(request.FromCreateRequestToPizza());
         var pizzaType = new PizzaType { PizzaId = createdPizza.Id, TypeId = request.TypeId };
         var pizzaSize = new PizzaSize { PizzaId = createdPizza.Id, SizeId = request.SizeId };
@@ -119,6 +123,23 @@ public class PizzaService : IPizzaService
         
         await _pizzaRepo.DeleteAsync(pizza);
         return true;
+    }
+
+    public async Task<Pizza?> EditAsync(int pizzaId, EditPizzaRequest request)
+    {
+        var pizza = await _pizzaRepo.GetByIdAsync(pizzaId);
+        var categoryExists = await _categoryRepo.ExistsAsync(request.CategoryId);
+        if (pizza == null || !categoryExists) return null;
+        
+        // check category
+        pizza.Name = request.Name;
+        pizza.Price = request.Price;
+        pizza.CategoryId = request.CategoryId;
+        pizza.Rating = request.Rating;
+        pizza.ImageUrl = request.ImageUrl;
+        
+        await _pizzaRepo.SaveChangesAsync();
+        return pizza;
     }
 
     public async Task<PizzaSize?> AddSizeAsync(int pizzaId, int sizeId)

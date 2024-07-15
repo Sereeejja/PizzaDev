@@ -13,7 +13,8 @@ public static class PizzaMappers
             Title = pizza.Name,
             Price = pizza.Price,
             Rating = pizza.Rating,
-            ImageUrl = pizza.ImageUrl
+            ImageUrl = pizza.ImageUrl,
+            Category = pizza.CategoryId,
         };
     }
 

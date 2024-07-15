@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from "react";
 import {useNavigate, useParams} from "react-router";
 import axios from "axios";
+import {BASE_URL} from "../settings";
 
 interface IPizza {
     imageUrl: string;
@@ -16,7 +17,7 @@ const PizzaPage: React.FC = () => {
   useEffect(() => {
     async function getPizza() {
       try {
-        const { data } = await axios.get("https://663bf4a5fee6744a6ea3641e.mockapi.io/items/" + id,);
+        const { data } = await axios.get(BASE_URL + 'pizza/' + id,);
           setPizza(data)
 
       } catch (e) {

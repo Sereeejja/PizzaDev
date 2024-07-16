@@ -71,30 +71,14 @@ public class PizzaService : IPizzaService
         var pizzaDtos = pizzas
             .Skip((queryParams.Page - 1) * queryParams.Limit)
             .Take(queryParams.Limit)
-            .Select(p => new PizzaDto
-            {
-                Id = p.Id,
-                Title = p.Name,
-                Price = p.Price,
-                Rating = p.Rating,
-                ImageUrl = p.ImageUrl,
-                Category = p.CategoryId,
-                Sizes = p.PizzaSizes
-                    .Select(ps => int.Parse(ps.Size.Name.Replace("cm", "")))
-                    .ToList(),
-                Types = p.PizzaTypes
-                    .Select(pt => pt.TypeId - 1)
-                    .OrderBy(type => type)
-                    .ToList()
-            
-            }).ToList();
+            .Select(p => p.PizzaToDto()).ToList();
         
         return (pizzaDtos, totalPages);
     }
 
     public async Task<Pizza?> GetOneAsync(int pizzaId)
     {
-        var pizza = await _pizzaRepo.GetByIdAsync(pizzaId);
+        var pizza = await _pizzaRepo.GetByIdWithDetailsAsync(pizzaId);
         return pizza;
     }
 
@@ -127,7 +111,7 @@ public class PizzaService : IPizzaService
 
     public async Task<Pizza?> EditAsync(int pizzaId, EditPizzaRequest request)
     {
-        var pizza = await _pizzaRepo.GetByIdAsync(pizzaId);
+        var pizza = await _pizzaRepo.GetByIdWithDetailsAsync(pizzaId);
         var categoryExists = await _categoryRepo.ExistsAsync(request.CategoryId);
         if (pizza == null || !categoryExists) return null;
         

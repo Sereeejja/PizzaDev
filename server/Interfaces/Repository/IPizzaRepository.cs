@@ -7,6 +7,7 @@ public interface IPizzaRepository
     /* Pizza */
     public IQueryable<Pizza> GetAll();
     public Task<Pizza?> GetByIdAsync(int id);
+    public Task<Pizza?> GetByIdWithDetailsAsync(int id);
     public Task<Pizza> CreateAsync(Pizza pizzaModel);
     public Task DeleteAsync(Pizza pizza);
     

@@ -13,8 +13,8 @@ public class Pizza
     public int Price { get; set; }
     public int Rating { get; set; }
     public int CategoryId { get; set; }
-    
-    public Category Category { get; set; }
+
+    public Category Category { get; set; } 
     public List<PizzaSize> PizzaSizes { get; set; } = new List<PizzaSize>();
     public List<CartItem> CartItems { get; set; } = new List<CartItem>();
     public List<PizzaType> PizzaTypes { get; set; } = new List<PizzaType>();

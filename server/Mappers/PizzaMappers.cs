@@ -15,6 +15,13 @@ public static class PizzaMappers
             Rating = pizza.Rating,
             ImageUrl = pizza.ImageUrl,
             Category = pizza.CategoryId,
+            Sizes = pizza.PizzaSizes
+                .Select(ps => int.Parse(ps.Size.Name.Replace("cm", "")))
+                .ToList(),
+            Types = pizza.PizzaTypes
+                .Select(pt => pt.TypeId - 1)
+                .OrderBy(type => type)
+                .ToList()
         };
     }
 

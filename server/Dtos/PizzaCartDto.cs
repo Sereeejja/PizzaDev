@@ -12,8 +12,6 @@ public class PizzaCartDto
     public int Category { get; set; }
     public int Count { get; set; }
     public int Size { get; set; }
-    public string Type { get; set; }
-    /*public List<int> Sizes { get; set; }
-    public List<int> Types { get; set; }*/
+    public string Type { get; set; } = string.Empty;
 
 }

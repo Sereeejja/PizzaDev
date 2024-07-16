@@ -1,4 +1,5 @@
-﻿using PizzaDev.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using PizzaDev.Data;
 using PizzaDev.Interfaces;
 using PizzaDev.Interfaces.Repository;
 using PizzaDev.Models;
@@ -21,6 +22,16 @@ public class PizzaRepository : IPizzaRepository
     public async Task<Pizza?> GetByIdAsync(int id)
     {
         return await _context.Pizzas.FindAsync(id);
+    }
+
+    public async Task<Pizza?> GetByIdWithDetailsAsync(int id)
+    {
+        return await _context.Pizzas
+            .Include(p => p.PizzaSizes)
+            .ThenInclude(ps => ps.Size)
+            .Include(p => p.PizzaTypes)
+            .ThenInclude(pt => pt.Type)
+            .FirstOrDefaultAsync(p => p.Id == id);
     }
 
     public async Task<Pizza> CreateAsync(Pizza pizzaModel)

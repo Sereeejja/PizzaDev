@@ -8,5 +8,4 @@ public class CartItemDto
     public int SizeId { get; set; }
     public int TypeId { get; set; }
     
-    /*public Cart Cart { get; set; }*/
 }
